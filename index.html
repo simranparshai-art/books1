@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Book Haven</title>
+    <style>
+      :root {
+        --bg: #f4efe8;
+        --panel: #fffdf9;
+        --primary: #3b2f2f;
+        --accent: #c07a52;
+        --accent-soft: #f8d9c6;
+        --text: #2c2323;
+        --muted: #6f5d5d;
+        --shadow: rgba(30, 20, 20, 0.12);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        background: linear-gradient(180deg, #f4efe8 0%, #efe9e1 100%);
+        color: var(--text);
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 32px 24px 60px;
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 28px;
+      }
+
+      .header h1 {
+        font-size: clamp(2.2rem, 5vw, 3.5rem);
+        margin: 0;
+        color: var(--primary);
+        letter-spacing: 0.04em;
+      }
+
+      .header p {
+        margin-top: 10px;
+        color: var(--muted);
+        font-size: 1.05rem;
+      }
+
+      .summary {
+        background: var(--panel);
+        border: 1px solid rgba(69, 52, 52, 0.08);
+        border-radius: 16px;
+        box-shadow: 0 8px 20px var(--shadow);
+        padding: 16px 20px;
+        margin: 0 auto 24px;
+        max-width: 420px;
+        text-align: center;
+      }
+
+      .summary strong {
+        color: var(--primary);
+        font-size: 1.1rem;
+      }
+
+      .summary span {
+        color: var(--accent);
+        font-weight: 700;
+        font-size: 1.4rem;
+      }
+
+      .filter-bar {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        margin: 0 auto 28px;
+        flex-wrap: wrap;
+      }
+
+      .filter-bar label {
+        font-weight: 700;
+        color: var(--primary);
+      }
+
+      .filter-bar select {
+        border: 1px solid rgba(59, 47, 47, 0.18);
+        border-radius: 10px;
+        background: var(--panel);
+        padding: 10px 12px;
+        font-size: 1rem;
+        color: var(--primary);
+      }
+
+      .book-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 22px;
+      }
+
+      .book-card {
+        background: var(--panel);
+        border-radius: 18px;
+        box-shadow: 0 8px 20px var(--shadow);
+        padding: 18px;
+        border: 1px solid rgba(69, 52, 52, 0.08);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      .book-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 26px rgba(61, 48, 46, 0.16);
+      }
+
+      .book-cover {
+        height: 170px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, var(--accent-soft), #e7d5c9 45%, #d3b5a4 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.2rem;
+        font-weight: bold;
+        color: var(--primary);
+        margin-bottom: 16px;
+      }
+
+      .book-title {
+        font-size: 1.2rem;
+        margin: 0 0 8px;
+        color: var(--primary);
+      }
+
+      .book-author {
+        margin: 0 0 14px;
+        color: var(--muted);
+        font-size: 0.92rem;
+      }
+
+      .book-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 10px;
+      }
+
+      .book-price {
+        background: var(--accent-soft);
+        color: var(--primary);
+        font-weight: 700;
+        padding: 8px 12px;
+        border-radius: 999px;
+      }
+
+      .book-rating {
+        color: #b8741e;
+        font-weight: 700;
+        font-size: 0.9rem;
+      }
+
+      .book-tag {
+        font-size: 0.8rem;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header class="header">
+        <h1>Book Haven</h1>
+        <p>Popular titles for every kind of reader</p>
+      </header>
+
+      <div class="summary">
+        <strong>Average book price:</strong>
+        <span id="average-price">$0.00</span>
+      </div>
+
+      <div class="filter-bar" aria-label="Book rating filter">
+        <label for="rating-filter">Minimum rating:</label>
+        <select id="rating-filter">
+          <option value="0">All</option>
+          <option value="4.0">4.0+</option>
+          <option value="4.3">4.3+</option>
+          <option value="4.5">4.5+</option>
+          <option value="4.8">4.8+</option>
+        </select>
+      </div>
+
+      <main id="book-list" class="book-grid" aria-live="polite"></main>
+    </div>
+
+    <script>
+      const books = [
+        { title: 'Atomic Habits', author: 'James Clear', price: 14.99, rating: 4.8 },
+        { title: 'The Alchemist', author: 'Paulo Coelho', price: 12.5, rating: 4.6 },
+        { title: 'Deep Work', author: 'Cal Newport', price: 16.25, rating: 4.7 },
+        { title: 'The Psychology of Money', author: 'Morgan Housel', price: 15.75, rating: 4.5 },
+        { title: 'Ikigai', author: 'Hector Garcia', price: 13.99, rating: 4.4 },
+        { title: 'Educated', author: 'Tara Westover', price: 17.4, rating: 4.9 },
+        { title: 'The Silent Patient', author: 'Alex Michaelides', price: 11.99, rating: 4.1 },
+        { title: 'It Ends with Us', author: 'Colleen Hoover', price: 10.99, rating: 4.2 },
+        { title: 'Pride and Prejudice', author: 'Jane Austen', price: 9.75, rating: 4.7 },
+        { title: 'The Hobbit', author: 'J.R.R. Tolkien', price: 18.5, rating: 4.8 },
+        { title: 'Sapiens', author: 'Yuval Noah Harari', price: 19.99, rating: 4.6 },
+        { title: 'The Book Thief', author: 'Markus Zusak', price: 14.25, rating: 4.5 }
+      ];
+
+      const list = document.getElementById('book-list');
+      const averagePriceEl = document.getElementById('average-price');
+      const ratingFilter = document.getElementById('rating-filter');
+
+      function renderBooks() {
+        const minRating = Number(ratingFilter.value);
+        const filteredBooks = books.filter((book) => book.rating >= minRating);
+
+        list.innerHTML = '';
+
+        if (filteredBooks.length === 0) {
+          list.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; color: #6f5d5d; font-size: 1.1rem;">No books match this rating filter.</p>';
+          averagePriceEl.textContent = '$0.00';
+          return;
+        }
+
+        const averagePrice = filteredBooks.reduce((sum, book) => sum + book.price, 0) / filteredBooks.length;
+        averagePriceEl.textContent = `$${averagePrice.toFixed(2)}`;
+
+        filteredBooks.forEach((book, index) => {
+          const card = document.createElement('article');
+          card.className = 'book-card';
+          card.innerHTML = `
+            <div class="book-cover">${index + 1}</div>
+            <h2 class="book-title">${book.title}</h2>
+            <p class="book-author">by ${book.author}</p>
+            <div class="book-meta">
+              <span class="book-tag">Featured</span>
+              <span class="book-rating">★ ${book.rating.toFixed(1)}</span>
+            </div>
+            <div class="book-meta" style="margin-top: 12px;">
+              <span></span>
+              <span class="book-price">$${book.price.toFixed(2)}</span>
+            </div>
+          `;
+          list.appendChild(card);
+        });
+      }
+
+      ratingFilter.addEventListener('change', renderBooks);
+      renderBooks();
+    </script>
+  </body>
+</html>
